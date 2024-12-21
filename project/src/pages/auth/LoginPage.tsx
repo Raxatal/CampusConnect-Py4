@@ -1,29 +1,52 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import LoginForm from './components/LoginForm';
 import GuestAccess from './components/GuestAccess';
 import AuthLayout from './components/AuthLayout';
+import { useAuth } from '../../contexts/AuthContext';
+import { useAuthNavigation } from '../../hooks/useAuthNavigation';
 
 const LoginPage = () => {
-  const navigate = useNavigate();
+  const { user, login, loginAsGuest } = useAuth();
+  const { navigateAfterLogin } = useAuthNavigation();
+  const [error, setError] = useState('');
 
-  // Placeholder for Firebase auth
+  // Redirect if already logged in
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+
   const handleUsmLogin = async (email: string, password: string) => {
-    console.log('USM Login:', { email, password });
-    // TODO: Implement Firebase authentication for USM emails
-    navigate('/');
+    try {
+      setError('');
+      await login(email, password);
+      navigateAfterLogin();
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || 'Failed to sign in');
+    }
   };
 
   const handleAdminLogin = async (email: string, password: string) => {
-    console.log('Admin Login:', { email, password });
-    // TODO: Implement Firebase authentication for admin accounts
-    navigate('/');
+    try {
+      setError('');
+      await login(email, password);
+      navigateAfterLogin();
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || 'Failed to sign in');
+    }
   };
 
-  const handleGuestAccess = () => {
-    console.log('Guest Access');
-    // TODO: Implement guest authentication
-    navigate('/');
+  const handleGuestAccess = async () => {
+    try {
+      setError('');
+      await loginAsGuest();
+      navigateAfterLogin();
+    } catch (error: any) {
+      console.error('Guest login error:', error);
+      setError('Guest access is temporarily unavailable. Please try again later or sign in with your account.');
+    }
   };
 
   return (
@@ -35,6 +58,12 @@ const LoginPage = () => {
             Connect with campus events at Universiti Sains Malaysia
           </p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+            {error}
+          </div>
+        )}
 
         <LoginForm onUsmLogin={handleUsmLogin} onAdminLogin={handleAdminLogin} />
         <GuestAccess onGuestAccess={handleGuestAccess} />

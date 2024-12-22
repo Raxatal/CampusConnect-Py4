@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
 import { Event } from '../../types';
+import { formatDate } from '../../utils/date';
 
 interface EventCardProps {
   event: Event;
@@ -19,7 +19,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
         <div className="flex items-center text-gray-600">
           <Calendar className="w-4 h-4 mr-2" />
           <span className="text-sm">
-            {format(new Date(event.date), 'PPP')}
+            {formatDate(event.startDate)}
           </span>
         </div>
         <div className="flex items-center text-gray-600">

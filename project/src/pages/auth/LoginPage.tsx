@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import LoginForm from './components/LoginForm';
 import GuestAccess from './components/GuestAccess';
 import AuthLayout from './components/AuthLayout';
+import FirebaseApp from "../../services/firebase";
+
 
 const LoginPage = () => {
   const navigate = useNavigate();
+
+  console.log("Firebase App:", FirebaseApp);
 
   // Placeholder for Firebase auth
   const handleUsmLogin = async (email: string, password: string) => {

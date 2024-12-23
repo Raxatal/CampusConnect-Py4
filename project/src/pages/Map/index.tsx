@@ -11,10 +11,10 @@ const Map = () => {
   // State to store the user's current location
   const [currentLocation, setCurrentLocation] = useState<[number, number] | null>(null);
 
-  // Example event data with types
+  // Example event data with types (using array)
   const events = [
-    { id: 1, name: 'Event A', lat: 5.358, lng: 100.304, type: 'A' },
-    { id: 2, name: 'Event B', lat: 5.360, lng: 100.307, type: 'B' },
+    { id: 1, name: 'Event A', lat: 5.358, lng: 100.304},
+    { id: 2, name: 'Event B', lat: 5.360, lng: 100.307},
   ];
 
   // Default coordinates for USM main campus
@@ -36,11 +36,11 @@ const Map = () => {
   });
 
   // Function to select the icon based on event type
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'A':
+  const getIcon = (id: number) => {
+    switch (id) {
+      case 1:
         return iconA;
-      case 'B':
+      case 2:
         return iconB;
       default:
         return iconA; // Default icon
@@ -72,7 +72,7 @@ const Map = () => {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-12rem)]">
+    <div className="h-[calc(99vh-12rem)]">
       <h1 className="text-2xl font-bold mb-4">Campus Map</h1>
       <div className="h-full rounded-lg overflow-hidden shadow-lg">
         <MapContainer
@@ -90,7 +90,7 @@ const Map = () => {
             <Marker
               key={event.id}
               position={[event.lat, event.lng]}
-              icon={getIcon(event.type)} // Assign icon based on event type
+              icon={getIcon(event.id)} // Assign icon based on event type
             >
               <Popup>
                 <strong>{event.name}</strong>

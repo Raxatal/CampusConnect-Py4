@@ -5,6 +5,7 @@ import GuestAccess from './components/GuestAccess';
 import AuthLayout from './components/AuthLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAuthNavigation } from '../../hooks/useAuthNavigation';
+import Logo from '../../images/Logo.png';
 
 const LoginPage = () => {
   const { user, login, loginAsGuest } = useAuth();
@@ -53,6 +54,7 @@ const LoginPage = () => {
     <AuthLayout>
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
+        <img className="object-scale-down h-40 m-auto" src={Logo} alt="CampusConnect Logo"></img>
           <h1 className="text-3xl font-bold">Welcome to Campus Connect</h1>
           <p className="mt-2 text-gray-600">
             Connect with campus events at Universiti Sains Malaysia

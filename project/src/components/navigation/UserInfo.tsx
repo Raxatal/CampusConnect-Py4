@@ -11,7 +11,7 @@ const UserInfo: React.FC = () => {
     : user.email?.split('@')[0] || 'User';
 
   return (
-    <span className="text-sm">Hi, {displayName}</span>
+    <span className="text-m font-semibold">Hi, {displayName}</span>
   );
 };
 

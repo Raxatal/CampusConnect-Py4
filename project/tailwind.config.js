@@ -2,7 +2,11 @@
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: theme => ({
+        'auth-bg-img': "url('/src/images/USMEntrance.jpeg')",
+      })
+    },
   },
   plugins: [],
 };

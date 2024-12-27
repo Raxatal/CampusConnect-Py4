@@ -1,9 +1,9 @@
 import React from 'react';
 import { Calendar, MapPin, User } from 'lucide-react';
-import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../ui/Modal';
 import { Event } from '../../types';
+import { formatDate } from '../../utils/date';
 
 interface EventDetailsModalProps {
   event: Event;
@@ -27,7 +27,9 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
         <div className="space-y-3">
           <div className="flex items-center text-gray-600">
             <Calendar className="w-5 h-5 mr-3" />
-            <span>{format(new Date(event.date), 'PPP p')}</span>
+            <span>
+              {formatDate(event.startDate)} - {formatDate(event.endDate)}
+            </span>
           </div>
           
           <div className="flex items-center text-gray-600">

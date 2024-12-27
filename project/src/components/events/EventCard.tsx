@@ -6,9 +6,14 @@ import { formatDate } from '../../utils/date';
 interface EventCardProps {
   event: Event;
   onClick?: () => void;
+  showStatus?: boolean;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
+const EventCard: React.FC<EventCardProps> = ({ 
+  event, 
+  onClick,
+  showStatus = event.type === 'public' // Only show status for public events by default
+}) => {
   return (
     <div 
       onClick={onClick}
@@ -22,12 +27,14 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
             {formatDate(event.startDate)}
           </span>
         </div>
-        <div className="flex items-center text-gray-600">
-          <MapPin className="w-4 h-4 mr-2" />
-          <span className="text-sm">{event.location.name}</span>
-        </div>
+        {event.location?.name && (
+          <div className="flex items-center text-gray-600">
+            <MapPin className="w-4 h-4 mr-2" />
+            <span className="text-sm">{event.location.name}</span>
+          </div>
+        )}
       </div>
-      {event.status && (
+      {showStatus && event.status && (
         <div className="mt-2">
           <span className={`text-xs px-2 py-1 rounded-full ${
             event.status === 'approved' ? 'bg-green-100 text-green-800' :

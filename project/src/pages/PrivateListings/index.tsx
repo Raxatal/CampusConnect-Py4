@@ -1,85 +1,110 @@
 import React, { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
-import EventCard from '../../components/events/EventCard';
-import Modal from '../../components/ui/Modal';
-import EventForm from '../../components/events/EventForm';
 import { Event } from '../../types';
+import Modal from '../../components/ui/Modal';
+import DeleteConfirmationModal from '../../components/ui/DeleteConfirmationModal';
+import EventDetailsModal from '../../components/events/EventDetailsModal';
+import PrivateEventForm from '../../components/events/PrivateEventForm';
+import Header from './components/Header';
+import EventsList from './components/EventsList';
+import usePrivateEvents from './hooks/usePrivateEvents';
 
 const PrivateListings = () => {
+  const { events, loading, createEvent, updateEvent, deleteEvent } = usePrivateEvents();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [detailsEvent, setDetailsEvent] = useState<Event | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
-  // Placeholder for private events data - will be replaced with actual API call
-  const privateEvents: Event[] = [
-    {
-      id: '4',
-      title: 'Study Group: Advanced Algorithms',
-      date: new Date('2024-03-28'),
-      location: { name: 'Library Discussion Room 3', coordinates: [5.355, 100.302] },
-      description: 'Weekly study group for CS students.',
-      organizer: 'Self',
-      type: 'private'
-    },
-    // Add more private events as needed
-  ];
-
-  const handleCreatePrivateEvent = (data: Partial<Event>) => {
-    // Handle creating private event
-    console.log('Creating private event:', data);
-    setIsCreateModalOpen(false);
+  const handleCreateEvent = async (data: Omit<Event, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => {
+    const success = await createEvent(data);
+    if (success) {
+      setIsCreateModalOpen(false);
+    }
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    // Handle deleting private event
-    console.log('Deleting event:', eventId);
+  const handleUpdateEvent = async (data: Omit<Event, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => {
+    if (!selectedEvent) return;
+    const success = await updateEvent(selectedEvent.id, data);
+    if (success) {
+      setIsEditModalOpen(false);
+      setSelectedEvent(null);
+    }
   };
+
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
+    await deleteEvent(eventToDelete);
+    setIsDeleteModalOpen(false);
+    setEventToDelete(null);
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Your Private Events</h1>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Create Private Event
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {privateEvents.map((event) => (
-          <div key={event.id} className="relative">
-            <EventCard 
-              event={event}
-              onClick={() => setSelectedEvent(event)}
-            />
-            <button
-              onClick={() => handleDeleteEvent(event.id)}
-              className="absolute top-2 right-2 p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        ))}
-      </div>
+      <Header onCreateClick={() => setIsCreateModalOpen(true)} />
+      
+      <EventsList
+        events={events}
+        onEventClick={setDetailsEvent}
+        onEventEdit={(event) => {
+          setSelectedEvent(event);
+          setIsEditModalOpen(true);
+        }}
+        onEventDelete={(eventId) => {
+          setEventToDelete(eventId);
+          setIsDeleteModalOpen(true);
+        }}
+      />
 
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Create Private Event"
       >
-        <EventForm
-          onSubmit={handleCreatePrivateEvent}
+        <PrivateEventForm
+          onSubmit={handleCreateEvent}
           onCancel={() => setIsCreateModalOpen(false)}
         />
       </Modal>
 
-      {selectedEvent && (
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedEvent(null);
+        }}
+        title="Edit Private Event"
+      >
+        <PrivateEventForm
+          onSubmit={handleUpdateEvent}
+          onCancel={() => {
+            setIsEditModalOpen(false);
+            setSelectedEvent(null);
+          }}
+          initialData={selectedEvent || undefined}
+          submitLabel="Save Changes"
+        />
+      </Modal>
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setEventToDelete(null);
+        }}
+        onConfirm={handleDeleteEvent}
+      />
+
+      {detailsEvent && (
         <EventDetailsModal
-          event={selectedEvent}
-          isOpen={!!selectedEvent}
-          onClose={() => setSelectedEvent(null)}
+          event={detailsEvent}
+          isOpen={!!detailsEvent}
+          onClose={() => setDetailsEvent(null)}
         />
       )}
     </div>

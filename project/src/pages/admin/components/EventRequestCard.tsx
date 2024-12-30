@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { Event } from '../../../types';
+import FileViewer from '../../../components/ui/FileViewer';
 
 interface EventRequestCardProps {
   event: Event;
@@ -21,6 +22,17 @@ const EventRequestCard: React.FC<EventRequestCardProps> = ({ event, onApprove, o
         <p>MyCSD: {event.isMyCSD ? 'Yes' : 'No'}</p>
       </div>
       <p className="mt-2 text-sm">{event.description}</p>
+      
+      {/* File Viewers */}
+      <div className="mt-4 space-y-4">
+        {event.posterUrl && (
+          <FileViewer url={event.posterUrl} type="poster" />
+        )}
+        {event.approvalLetterUrl && (
+          <FileViewer url={event.approvalLetterUrl} type="approval" />
+        )}
+      </div>
+
       <div className="mt-4 flex justify-end space-x-2">
         <button
           onClick={onReject}

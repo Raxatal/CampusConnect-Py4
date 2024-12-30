@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, MapPin, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../ui/Modal';
+import FileViewer from '../ui/FileViewer';
 import { Event } from '../../types';
 import { formatDate } from '../../utils/date';
 
@@ -15,7 +16,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
   const navigate = useNavigate();
 
   const handleViewOnMap = () => {
-    navigate(`/map?eventId=${event.id}`);
+    navigate(`/map?lat=${event.location.latitude}&lng=${event.location.longitude}`);
     onClose();
   };
 
@@ -47,6 +48,13 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
           <h4 className="font-semibold mb-2">Description</h4>
           <p className="text-gray-600">{event.description}</p>
         </div>
+
+        {event.posterUrl && (
+          <div>
+            <h4 className="font-semibold mb-2">Event Poster</h4>
+            <FileViewer url={event.posterUrl} type="poster" thumbnailMode />
+          </div>
+        )}
 
         <div className="flex justify-end">
           <button

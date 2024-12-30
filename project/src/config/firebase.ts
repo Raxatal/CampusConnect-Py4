@@ -1,8 +1,8 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyDKXLGvcqqyHx5h3FfQFaIqgdB8HAjqIG0",
-  authDomain: "campus-connect-bolt.firebaseapp.com",
-  projectId: "campus-connect-bolt",
-  storageBucket: "campus-connect-bolt.firebasestorage.app",
-  messagingSenderId: "471970634324",
-  appId: "1:471970634324:web:9dfac540d7d104fa95abc1"
+  apiKey: "AIzaSyDbgHMiHWEby-lPirDo6IamPjQpFcVusA8",
+  authDomain: "campus-connect-e6b26.firebaseapp.com",
+  projectId: "campus-connect-e6b26",
+  storageBucket: "campus-connect-e6b26.firebasestorage.app",
+  messagingSenderId: "42256183267",
+  appId: "1:42256183267:web:b8596e144d21e7b3e77ad6"
 };

@@ -19,7 +19,8 @@ export const createEventRequest = async (
 export const getUserEvents = async (userId: string): Promise<Event[]> => {
   const q = query(
     collection(db, EVENTS_COLLECTION),
-    where('organizerId', '==', userId)
+    where('requesterId', '==', userId),
+    where('type', '==', 'public') // Only get public events
   );
   
   const snapshot = await getDocs(q);

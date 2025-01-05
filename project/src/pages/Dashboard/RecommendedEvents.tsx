@@ -1,6 +1,6 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import EventCard from '../../components/events/EventCard';
+import EventDetailsModal from '../../components/events/EventDetailsModal';
 import { getRandomApprovedEvents } from '../../services/eventService';
 import { Event } from '../../types';
 
@@ -11,6 +11,7 @@ interface RecommendedEventsProps {
 const RecommendedEvents: React.FC<RecommendedEventsProps> = ({ onEventClick }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
     loadEvents();
@@ -43,10 +44,18 @@ const RecommendedEvents: React.FC<RecommendedEventsProps> = ({ onEventClick }) =
           <EventCard 
             key={event.id} 
             event={event}
-            onClick={() => onEventClick(event.id)}
+            onClick={() => setSelectedEvent(event)}
           />
         ))}
       </div>
+
+      {selectedEvent && (
+        <EventDetailsModal
+          event={selectedEvent}
+          isOpen={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
     </div>
   );
 };

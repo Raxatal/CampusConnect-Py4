@@ -1,5 +1,5 @@
-import { query, where, getDocs, orderBy } from 'firebase/firestore';
-import { eventsCollection } from '../firebase';
+import { query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { eventsCollection, db } from '../firebase';
 import { Event } from '../../types';
 
 export const getApprovedPublicEvents = async (): Promise<Event[]> => {
@@ -27,4 +27,19 @@ export const getApprovedPublicEvents = async (): Promise<Event[]> => {
     console.error('Error fetching approved public events:', error);
     return [];
   }
+};
+
+export const updatePublicEvent = async (
+  eventId: string,
+  data: Partial<Event>
+): Promise<void> => {
+  const eventRef = doc(db, 'events', eventId);
+  await updateDoc(eventRef, {
+    ...data,
+    updatedAt: Timestamp.now()
+  });
+};
+
+export const deletePublicEvent = async (eventId: string): Promise<void> => {
+  await deleteDoc(doc(db, 'events', eventId));
 };

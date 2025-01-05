@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useAuthNavigation } from '../../hooks/useAuthNavigation';
 import UserInfo from './UserInfo';
 import LogoutButton from './LogoutButton';
+import Logo from './Logo';
 
 const TopNav = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -27,19 +28,19 @@ const TopNav = () => {
 
   return (
     <>
-      <nav className="bg-blue-600 text-white shadow-lg">
+      <nav className="bg-orange-500 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/" className="text-xl font-bold">
-                Campus Connect
+              <Link to="/" className="flex items-center">
+                <Logo />
               </Link>
             </div>
             <div className="flex items-center space-x-4">
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin/event-requests')}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-blue-700"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-orange-600"
                 >
                   <ClipboardList className="w-5 h-5" />
                   <span>Event Requests</span>

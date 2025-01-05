@@ -4,15 +4,17 @@ import { useSearchParams } from 'react-router-dom';
 import { Event } from '../../types';
 import VenueMarker from '../../components/map/VenueMarker';
 import EventMarker from '../../components/map/EventMarker';
+import UserLocationMarker from '../../components/map/UserLocationMarker';
 import MapController from '../../components/map/MapController';
 import EventDetailsModal from '../../components/events/EventDetailsModal';
 import { useVenues } from '../../hooks/useVenues';
 import { useMapEvents } from '../../hooks/useMapEvents';
+import { useUserLocation } from '../../hooks/useUserLocation';
 import 'leaflet/dist/leaflet.css';
 
 // USM main campus bounds
 const bounds: [[number, number], [number, number]] = [
-  [5.345, 100.285], // Southwest coordinates
+  [5.345, 100.287], // Southwest coordinates
   [5.365, 100.310]  // Northeast coordinates
 ];
 
@@ -26,6 +28,9 @@ const Map = () => {
   const { venues, loading: venuesLoading } = useVenues();
   const { eventsByLocation, loading: eventsLoading } = useMapEvents();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const { coords: userLocation } = useUserLocation();
+
+  const center = userLocation || defaultCenter;
 
   if (venuesLoading || eventsLoading) {
     return <div className="h-[calc(100vh-8rem)] flex items-center justify-center">
@@ -37,7 +42,7 @@ const Map = () => {
     <div className="h-[calc(100vh-10rem)] -mt-4">
       <div className="h-full rounded-lg overflow-hidden shadow-lg">
         <MapContainer
-          center={defaultCenter}
+          center={center}
           zoom={defaultZoom}
           className="h-full"
           maxBounds={bounds}
@@ -48,6 +53,7 @@ const Map = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           <MapController eventId={eventId} bounds={bounds} />
+          <UserLocationMarker />
           
           {/* Render venue markers */}
           {venues.map((venue) => (

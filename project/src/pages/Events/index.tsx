@@ -1,23 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { ListFilter, MapPin, Sparkles, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import EventCard from '../../components/events/EventCard';
 import EventDetailsModal from '../../components/events/EventDetailsModal';
 import { Event } from '../../types';
-import { getApprovedPublicEvents } from '../../services/events';
-import SortSelect from './components/SortSelect';
+import { getApprovedPublicEvents, updatePublicEvent, deletePublicEvent } from '../../services/events';
+import { getVenues } from '../../services/venues';
+import SortSelect, { SortOption } from './components/SortSelect';
 import FilterSelect from './components/FilterSelect';
+import LocationFilter from '../../components/events/LocationFilter';
+import { useUserLocation } from '../../hooks/useUserLocation';
+import { calculateDistance } from '../../utils/location';
 
 const Events = () => {
   const [filter, setFilter] = useState<'all' | 'mycsd'>('all');
-  const [sortBy, setSortBy] = useState<'date' | 'title'>('date');
+  const [sortBy, setSortBy] = useState<SortOption>('date');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [locationFilterEnabled, setLocationFilterEnabled] = useState(false);
+  const [radius, setRadius] = useState(0.25); // Default radius in kilometers
+  const { coords: userLocation } = useUserLocation();
+  const [venueDistances, setVenueDistances] = useState<{ venueName: string; distance: number }[]>([]);
 
   useEffect(() => {
     loadEvents();
   }, []);
+
+  useEffect(() => {
+    if (userLocation) {
+      calculateVenueDistances();
+    }
+  }, [userLocation]);
+
+  const calculateVenueDistances = async () => {
+    if (!userLocation) return;
+    
+    try {
+      const venues = await getVenues();
+      const distances = venues.map(venue => ({
+        venueName: venue.name,
+        distance: calculateDistance(
+          userLocation[0],
+          userLocation[1],
+          venue.latitude,
+          venue.longitude
+        )
+      })).sort((a, b) => a.distance - b.distance);
+      
+      setVenueDistances(distances);
+    } catch (error) {
+      console.error('Error calculating venue distances:', error);
+    }
+  };
 
   const loadEvents = async () => {
     try {
@@ -30,24 +65,59 @@ const Events = () => {
     }
   };
 
-  // Filter events based on search query and filter type
+  const handleEditEvent = async (event: Event, data: Partial<Event>) => {
+    try {
+      await updatePublicEvent(event.id, data);
+      await loadEvents();
+    } catch (error) {
+      console.error('Error updating event:', error);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      await deletePublicEvent(eventId);
+      await loadEvents();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
+  };
+
+  // Filter events based on search query, type, and location
   const filteredEvents = events.filter(event => {
     const matchesSearch = 
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.location.name.toLowerCase().includes(searchQuery.toLowerCase());
     
-    if (filter === 'mycsd') {
-      return matchesSearch && event.isMyCSD;
+    const matchesType = filter === 'all' ? true : event.isMyCSD;
+    
+    // Location-based filtering
+    let matchesLocation = true;
+    if (locationFilterEnabled && userLocation && event.location) {
+      const venueDistance = venueDistances.find(
+        v => v.venueName === event.location.name
+      )?.distance;
+      
+      if (venueDistance !== undefined) {
+        matchesLocation = venueDistance <= radius;
+      }
     }
-    return matchesSearch;
+    
+    return matchesSearch && matchesType && matchesLocation;
   });
 
   // Sort filtered events
   const sortedEvents = [...filteredEvents].sort((a, b) => {
-    if (sortBy === 'date') {
-      return a.startDate.getTime() - b.startDate.getTime();
+    switch (sortBy) {
+      case 'date':
+        return a.startDate.getTime() - b.startDate.getTime();
+      case 'title':
+        return a.title.localeCompare(b.title);
+      case 'venue':
+        return a.location.name.localeCompare(b.location.name);
+      default:
+        return 0;
     }
-    return a.title.localeCompare(b.title);
   });
 
   if (loading) {
@@ -63,6 +133,14 @@ const Events = () => {
           <SortSelect value={sortBy} onChange={setSortBy} />
         </div>
       </div>
+
+      <LocationFilter
+        enabled={locationFilterEnabled}
+        onToggle={() => setLocationFilterEnabled(!locationFilterEnabled)}
+        radius={radius}
+        onRadiusChange={setRadius}
+        distances={venueDistances}
+      />
 
       {/* Search Bar */}
       <div className="relative">
@@ -89,6 +167,8 @@ const Events = () => {
               key={event.id}
               event={event}
               onClick={() => setSelectedEvent(event)}
+              onEdit={async (data) => await handleEditEvent(event, data)}
+              onDelete={async () => await handleDeleteEvent(event.id)}
             />
           ))}
         </div>

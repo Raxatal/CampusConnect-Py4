@@ -1,40 +1,49 @@
 import React from 'react';
 import { Calendar, MapPin } from 'lucide-react';
+import { format } from 'date-fns';
 import { Event } from '../../types';
-import { formatDate } from '../../utils/date';
+import { useAuth } from '../../contexts/AuthContext';
+import AdminEventControls from './AdminEventControls';
 
 interface EventCardProps {
   event: Event;
   onClick?: () => void;
-  showStatus?: boolean;
+  onEdit?: (data: Partial<Event>) => Promise<void>;
+  onDelete?: () => Promise<void>;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ 
-  event, 
-  onClick,
-  showStatus = event.type === 'public' // Only show status for public events by default
-}) => {
+const EventCard: React.FC<EventCardProps> = ({ event, onClick, onEdit, onDelete }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.email === 'admin@usm.my';
+  const showAdminControls = isAdmin && event.status === 'approved' && onEdit && onDelete;
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't trigger card click if clicking admin controls
+    if ((e.target as HTMLElement).closest('.admin-controls')) {
+      return;
+    }
+    onClick?.();
+  };
+
   return (
     <div 
-      onClick={onClick}
-      className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={handleCardClick}
+      className="relative group bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow cursor-pointer"
     >
       <h3 className="font-semibold text-lg text-gray-800">{event.title}</h3>
       <div className="mt-2 space-y-2">
         <div className="flex items-center text-gray-600">
           <Calendar className="w-4 h-4 mr-2" />
           <span className="text-sm">
-            {formatDate(event.startDate)}
+            {format(new Date(event.startDate), 'PPP')}
           </span>
         </div>
-        {event.location?.name && (
-          <div className="flex items-center text-gray-600">
-            <MapPin className="w-4 h-4 mr-2" />
-            <span className="text-sm">{event.location.name}</span>
-          </div>
-        )}
+        <div className="flex items-center text-gray-600">
+          <MapPin className="w-4 h-4 mr-2" />
+          <span className="text-sm">{event.location.name}</span>
+        </div>
       </div>
-      {showStatus && event.status && (
+      {event.status && (
         <div className="mt-2">
           <span className={`text-xs px-2 py-1 rounded-full ${
             event.status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -43,6 +52,16 @@ const EventCard: React.FC<EventCardProps> = ({
           }`}>
             {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
           </span>
+        </div>
+      )}
+
+      {showAdminControls && (
+        <div className="admin-controls">
+          <AdminEventControls
+            event={event}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         </div>
       )}
     </div>

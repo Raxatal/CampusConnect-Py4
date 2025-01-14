@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -12,8 +12,19 @@ import Requests from './pages/Requests';
 import PrivateListings from './pages/PrivateListings';
 import CreateRequest from './pages/Requests/CreateRequest';
 import EventRequests from './pages/admin/EventRequests';
+import { checkExpiredEvents } from './services/events';
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // Check for expired events immediately when app loads
+    checkExpiredEvents();
+
+    // Set up interval to check every minute
+    const interval = setInterval(checkExpiredEvents, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <AuthProvider>
       <Router>

@@ -1,26 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { Event } from '../../types';
-import { getPendingEvents, updateEventStatus, deleteRejectedEvents } from '../../services/events';
+import { 
+  getPendingEvents, 
+  updateEventStatus, 
+  deleteRejectedAndExpiredEvents,
+  getRejectedAndExpiredEvents,
+  checkExpiredEvents
+} from '../../services/events';
 import EventRequestCard from './components/EventRequestCard';
 import DeleteRejectedButton from './components/DeleteRejectedButton';
 import RejectionModal from './components/RejectionModal';
 
 const EventRequests = () => {
   const [pendingEvents, setPendingEvents] = useState<Event[]>([]);
+  const [rejectedAndExpiredEvents, setRejectedAndExpiredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
 
   useEffect(() => {
-    loadPendingEvents();
+    loadEvents();
+    // Set up interval to check for expired events every minute
+    const interval = setInterval(async () => {
+      await checkExpiredEvents();
+      await loadEvents();
+    }, 60000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const loadPendingEvents = async () => {
+  const loadEvents = async () => {
     try {
-      const events = await getPendingEvents();
-      setPendingEvents(events);
+      const [pending, rejectedAndExpired] = await Promise.all([
+        getPendingEvents(),
+        getRejectedAndExpiredEvents()
+      ]);
+      setPendingEvents(pending);
+      setRejectedAndExpiredEvents(rejectedAndExpired);
     } catch (error) {
-      console.error('Error loading pending events:', error);
+      console.error('Error loading events:', error);
     } finally {
       setLoading(false);
     }
@@ -29,7 +47,7 @@ const EventRequests = () => {
   const handleApprove = async (event: Event) => {
     try {
       await updateEventStatus(event.id, 'approved');
-      await loadPendingEvents();
+      await loadEvents();
     } catch (error) {
       console.error('Error approving event:', error);
     }
@@ -40,18 +58,18 @@ const EventRequests = () => {
       await updateEventStatus(event.id, 'rejected', reason);
       setShowRejectionModal(false);
       setSelectedEvent(null);
-      await loadPendingEvents();
+      await loadEvents();
     } catch (error) {
       console.error('Error rejecting event:', error);
     }
   };
 
-  const handleDeleteRejected = async () => {
+  const handleDeleteRejectedAndExpired = async () => {
     try {
-      await deleteRejectedEvents();
-      // No need to reload pending events as we only deleted rejected ones
+      await deleteRejectedAndExpiredEvents();
+      await loadEvents();
     } catch (error) {
-      console.error('Error deleting rejected events:', error);
+      console.error('Error deleting rejected and expired events:', error);
     }
   };
 
@@ -63,7 +81,10 @@ const EventRequests = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Event Requests</h1>
-        <DeleteRejectedButton onDelete={handleDeleteRejected} />
+        <DeleteRejectedButton 
+          events={rejectedAndExpiredEvents}
+          onDelete={handleDeleteRejectedAndExpired} 
+        />
       </div>
 
       {pendingEvents.length === 0 ? (

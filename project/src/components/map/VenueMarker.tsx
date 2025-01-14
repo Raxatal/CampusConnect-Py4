@@ -24,10 +24,15 @@ const venueIcon = new Icon({
 const VenueMarker: React.FC<VenueMarkerProps> = ({ venue }) => {
   const [showVenueEvents, setShowVenueEvents] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const { events } = useVenueEvents(showVenueEvents ? venue : null);
+  const { events } = useVenueEvents(venue); // Always fetch events for the venue
 
   if (!venue.latitude || !venue.longitude) {
     console.warn(`Missing coordinates for venue ${venue.name}`);
+    return null;
+  }
+
+  // Don't render the marker if there are no events
+  if (events.length === 0) {
     return null;
   }
 

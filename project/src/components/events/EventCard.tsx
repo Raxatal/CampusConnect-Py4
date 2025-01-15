@@ -18,7 +18,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick, onEdit, onDelete 
   const showAdminControls = isAdmin && event.status === 'approved' && onEdit && onDelete;
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Don't trigger card click if clicking admin controls
     if ((e.target as HTMLElement).closest('.admin-controls')) {
       return;
     }
@@ -28,7 +27,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick, onEdit, onDelete 
   return (
     <div 
       onClick={handleCardClick}
-      className="relative group bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow cursor-pointer"
+      className="relative group bg-white rounded-lg shadow-md p-4 hover-card cursor-pointer"
     >
       <h3 className="font-semibold text-lg text-gray-800">{event.title}</h3>
       <div className="mt-2 space-y-2">
@@ -45,7 +44,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick, onEdit, onDelete 
       </div>
       {event.status && (
         <div className="mt-2">
-          <span className={`text-xs px-2 py-1 rounded-full ${
+          <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${
             event.status === 'approved' ? 'bg-green-100 text-green-800' :
             event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
             'bg-red-100 text-red-800'

@@ -13,17 +13,17 @@ const Logo: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       <img 
         src={logoUrl} 
         alt="CampusConnect Logo" 
-        className="h-16 w-auto"
+        className="h-12 sm:h-16 w-auto"
         onError={(e) => {
           const img = e.target as HTMLImageElement;
           img.src = 'https://via.placeholder.com/150x50?text=CampusConnect';
         }}
       />
-      <span className="text-xl font-bold text-white">Campus Connect</span>
+      <span className="text-sm sm:text-xl font-bold text-white">Campus Connect</span>
     </div>
   );
 };

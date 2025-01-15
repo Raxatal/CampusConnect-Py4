@@ -12,3 +12,63 @@ body {
   height: 100%;
   min-height: 400px;
 }
+
+/* Enhanced transitions and animations */
+.modal-overlay {
+  @apply transition-opacity duration-300 ease-in-out;
+}
+
+.modal-content {
+  @apply transition-all duration-300 ease-in-out transform;
+}
+
+.modal-enter {
+  @apply opacity-0;
+}
+
+.modal-enter .modal-content {
+  @apply scale-95 -translate-y-4;
+}
+
+.modal-enter-active {
+  @apply opacity-100;
+}
+
+.modal-enter-active .modal-content {
+  @apply scale-100 translate-y-0;
+}
+
+.modal-exit {
+  @apply opacity-100;
+}
+
+.modal-exit .modal-content {
+  @apply scale-100;
+}
+
+.modal-exit-active {
+  @apply opacity-0;
+}
+
+.modal-exit-active .modal-content {
+  @apply scale-95;
+}
+
+/* Enhanced hover states */
+.hover-card {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.hover-card:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+/* Button transitions */
+button {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Navigation link transitions */
+.nav-link {
+  @apply transition-colors duration-200 ease-in-out;
+}

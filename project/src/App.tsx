@@ -12,6 +12,7 @@ import Requests from './pages/Requests';
 import PrivateListings from './pages/PrivateListings';
 import CreateRequest from './pages/Requests/CreateRequest';
 import EventRequests from './pages/admin/EventRequests';
+import Reports from './pages/admin/Reports';
 import { checkExpiredEvents } from './services/events';
 
 const App: React.FC = () => {
@@ -44,6 +45,11 @@ const App: React.FC = () => {
             <Route path="admin/event-requests" element={
               <AdminRoute>
                 <EventRequests />
+              </AdminRoute>
+            } />
+            <Route path="admin/reports" element={
+              <AdminRoute>
+                <Reports />
               </AdminRoute>
             } />
           </Route>

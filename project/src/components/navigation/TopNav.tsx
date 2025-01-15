@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ClipboardList } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import LogoutModal from '../ui/LogoutModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAuthNavigation } from '../../hooks/useAuthNavigation';
 import UserInfo from './UserInfo';
 import LogoutButton from './LogoutButton';
 import Logo from './Logo';
+import AdminMenu from './AdminMenu';
 
 const TopNav = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
   const { navigateToLogin } = useAuthNavigation();
-  const navigate = useNavigate();
-
   const isAdmin = user?.email === 'admin@usm.my';
 
   const handleLogout = async () => {
@@ -37,15 +35,7 @@ const TopNav = () => {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              {isAdmin && (
-                <button
-                  onClick={() => navigate('/admin/event-requests')}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-orange-600"
-                >
-                  <ClipboardList className="w-5 h-5" />
-                  <span>Event Requests</span>
-                </button>
-              )}
+              {isAdmin && <AdminMenu />}
               {user && (
                 <>
                   <UserInfo />

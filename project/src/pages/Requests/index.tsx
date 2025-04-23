@@ -1,65 +1,73 @@
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
-import EventCard from '../../components/events/EventCard';
-import Modal from '../../components/ui/Modal';
-import EventForm from '../../components/events/EventForm';
-import EventDetailsModal from '../../components/events/EventDetailsModal';
+import React, { useState, useEffect } from 'react';
 import { Event } from '../../types';
+import { createEventRequest, getUserEvents } from '../../services/events';
+import { useAuth } from '../../contexts/AuthContext';
+import Modal from '../../components/ui/Modal';
+import EventRequestForm from '../../components/events/EventRequestForm';
+import EventDetailsModal from '../../components/events/EventDetailsModal';
+import RequestList from './components/RequestList';
+import CreateRequestButton from './components/CreateRequestButton';
 
 const Requests = () => {
+  const { user } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userEvents, setUserEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Placeholder for requests data - will be replaced with actual API call
-  const requests: Event[] = [
-    {
-      id: '3',
-      title: 'Programming Workshop',
-      date: new Date('2024-04-01'),
-      location: { name: 'Lab 101', coordinates: [5.355, 100.302] },
-      description: 'Hands-on programming workshop for beginners.',
-      organizer: 'Computing Society',
-      type: 'public',
-      status: 'pending'
-    },
-    // Add more requests as needed
-  ];
+  useEffect(() => {
+    if (user) {
+      loadUserEvents();
+    }
+  }, [user]);
 
-  const handleCreateRequest = (data: Partial<Event>) => {
-    // Handle creating event request
-    console.log('Creating event request:', data);
-    setIsCreateModalOpen(false);
+  const loadUserEvents = async () => {
+    try {
+      const events = await getUserEvents(user!.uid);
+      setUserEvents(events);
+    } catch (error) {
+      console.error('Error loading user events:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleCreateRequest = async (data: Omit<Event, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      setIsSubmitting(true);
+      await createEventRequest(data);
+      setIsCreateModalOpen(false);
+      loadUserEvents();
+    } catch (error) {
+      console.error('Error creating event request:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Your Event Requests</h1>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Create Request
-        </button>
+        <CreateRequestButton onClick={() => setIsCreateModalOpen(true)} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {requests.map((request) => (
-          <EventCard
-            key={request.id}
-            event={request}
-            onClick={() => setSelectedEvent(request)}
-          />
-        ))}
-      </div>
+      <RequestList 
+        events={userEvents} 
+        onEventClick={setSelectedEvent} 
+      />
 
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Create Event Request"
       >
-        <EventForm
+        <EventRequestForm
           onSubmit={handleCreateRequest}
           onCancel={() => setIsCreateModalOpen(false)}
         />

@@ -1,20 +1,28 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ClipboardList } from 'lucide-react';
 import LogoutModal from '../ui/LogoutModal';
-import { useLogout } from '../../hooks/useLogout';
+import { useAuth } from '../../contexts/AuthContext';
+import { useAuthNavigation } from '../../hooks/useAuthNavigation';
+import UserInfo from './UserInfo';
+import LogoutButton from './LogoutButton';
+import Logo from '../../images/LogoAlt.png';
 
 const TopNav = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const { logout } = useLogout();
+  const { user, logout } = useAuth();
+  const { navigateToLogin } = useAuthNavigation();
+  const navigate = useNavigate();
+
+  const isAdmin = user?.email === 'admin@usm.my';
 
   const handleLogout = async () => {
     try {
       await logout();
       setShowLogoutModal(false);
+      navigateToLogin();
     } catch (error) {
       console.error('Error during logout:', error);
-      // TODO: Show error notification to user
     }
   };
 
@@ -24,18 +32,27 @@ const TopNav = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/" className="text-xl font-bold">
-                Campus Connect
+              <img className="object-cover max-h-full drop-shadow-md m-auto" src={Logo} alt="CampusConnect Logo"></img>
+              <Link to="/" className="text-xl font-semibold">
+                CampusConnect
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <button 
-                className="p-2 hover:bg-blue-700 rounded-full"
-                onClick={() => setShowLogoutModal(true)}
-                aria-label="Logout"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => navigate('/admin/event-requests')}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-blue-700"
+                >
+                  <ClipboardList className="w-5 h-5" />
+                  <span>Event Requests</span>
+                </button>
+              )}
+              {user && (
+                <>
+                  <UserInfo />
+                  <LogoutButton onClick={() => setShowLogoutModal(true)} />
+                </>
+              )}
             </div>
           </div>
         </div>

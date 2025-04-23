@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AtSign, Lock, AlertCircle } from 'lucide-react';
+import { isUsmEmail, isAdminEmail } from '../../../utils/auth';
 
 interface LoginFormProps {
   onUsmLogin: (email: string, password: string) => void;
@@ -16,9 +17,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onUsmLogin, onAdminLogin }) => {
     setError('');
 
     try {
-      if (email.endsWith('@usm.my')) {
+      if (isUsmEmail(email)) {
         await onUsmLogin(email, password);
-      } else if (email.endsWith('@admin.campusconnect.my')) {
+      } else if (isAdminEmail(email)) {
         await onAdminLogin(email, password);
       } else {
         setError('Please use a valid USM email or admin email');
@@ -44,7 +45,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onUsmLogin, onAdminLogin }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="email@usm.my"
+            placeholder="email@student.usm.my"
             required
           />
         </div>

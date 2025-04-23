@@ -1,6 +1,6 @@
 // Authentication utility functions
 export const isUsmEmail = (email: string): boolean => {
-  return email.endsWith('@usm.my');
+  return email.endsWith('@usm.my') || email.endsWith('@student.usm.my');
 };
 
 export const isAdminEmail = (email: string): boolean => {
